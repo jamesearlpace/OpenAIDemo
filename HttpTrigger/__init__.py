@@ -25,7 +25,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         openai.api_type = "azure"
         openai.api_base = "https://openai-sandbox-jep.openai.azure.com/"
         openai.api_version = "2022-12-01"
-        openai.api_key = os.environ["OpenAIKey"]
+        openai.api_key = os.environ.get("OPENAI_API_KEY")
 
         response = openai.Completion.create(
             engine="davinci3",

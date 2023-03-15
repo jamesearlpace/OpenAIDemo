@@ -15,7 +15,7 @@ def main(myblob: func.InputStream):
 
 
 # Analizar la cadena de conexión y el nombre del contenedor desde las variables de entorno
-connection_string = os.environ["StorageConnectionString"]
+connection_string = os.environ.get("STORAGE_CONNECTION_STRING")
 
 # Crear BlobServiceClient utilizando la cadena de conexión
 blob_service_client = BlobServiceClient.from_connection_string(connection_string)
@@ -51,7 +51,7 @@ prompt = beginning_text + prompt + ending_text
 openai.api_type = "azure"
 openai.api_base = "https://openai-sandbox-jep.openai.azure.com/"
 openai.api_version = "2022-12-01"
-openai.api_key = os.environ["OpenAIKey"]
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 response = openai.Completion.create(
 engine="davinci3",
