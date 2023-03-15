@@ -1,3 +1,7 @@
+#Ejecutar en Azure Functions cuando se hace una petición HTTP
+
+
+#Configurar function
 import logging
 import azure.functions as func
 import openai
@@ -14,18 +18,26 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             name = req_body.get('name')
 
     if name:
-        openai.api_key = "OpenAIKey"
-        response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt=name,
-        temperature=0.4,
-        max_tokens=64,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0
-        )
 
-        #print(response)
+#Hacer llamada a la API de OpenAI
+        import os
+        import openai
+        openai.api_type = "azure"
+        openai.api_base = "https://openai-sandbox-jep.openai.azure.com/"
+        openai.api_version = "2022-12-01"
+        openai.api_key = os.environ["OpenAIKey"]
+
+        response = openai.Completion.create(
+            engine="davinci3",
+            prompt=name,
+            temperature=1,
+            max_tokens=100,
+            top_p=0.5,
+            frequency_penalty=0,
+            presence_penalty=0,
+            best_of=1,
+            stop=None)
+
         response = response['choices'][0]['text']
 
         return func.HttpResponse(f"{response}")

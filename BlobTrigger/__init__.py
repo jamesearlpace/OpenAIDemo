@@ -1,8 +1,4 @@
-
-
-
-
-#Update this code to show miliseconds in the timestamp
+#Ejecutar en Azure Functions cuando se sube un archivo .txt a un contenedor de Blob Storage
 
 import os
 import logging
@@ -17,58 +13,59 @@ def main(myblob: func.InputStream):
                  f"Name: {myblob.name}\n"
                  f"Blob Size: {myblob.length} bytes")
 
-    # Parse connection string and container name from the environment variables
-    connection_string = "StorageConnectionString"
 
-    # Create BlobServiceClient using the connection string
-    blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+# Analizar la cadena de conexión y el nombre del contenedor desde las variables de entorno
+connection_string = os.environ["StorageConnectionString"]
 
-    # Modify the file name by appending '_edited' to the end
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") # generate timestamp
+# Crear BlobServiceClient utilizando la cadena de conexión
+blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
-    file_name = myblob.name.replace(".txt", f"_{timestamp}.json")
+# Modificar el nombre del archivo agregando '_editado' al final
+timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") # generar marca de tiempo
 
-    # Create BlobClient for the new blob with the modified name in the same container
-    new_blob_client = blob_service_client.get_blob_client(container="destination", blob=file_name)
+file_name = myblob.name.replace(".txt", f"_{timestamp}.json")
 
-    # Copy the contents of the original blob to a new variable
-    file_content = myblob.read().decode('utf-8')
+# Crear BlobClient para el nuevo blob con el nombre modificado en el mismo contenedor
+new_blob_client = blob_service_client.get_blob_client(container="destination", blob=file_name)
 
-
-    # Set the contents of the new file to the output of the OpenAI API call
-    prompt = file_content
-    beginning_text = "This is a call center conversation ###"
-    ending_text = """### Summarize this in json by 
-                customer_satisfaction on a scale of 1-10 with 1 being the least satisfied,
-                customer_sentiment,
-                chat_duration in seconds,
-                issue_resolved true/false,
-                issue_category,
-                issue_subcategory,
-                agent_name,
-                customer_name."""
-    prompt = beginning_text + prompt + ending_text
+# Copiar el contenido del blob original a una nueva variable
+file_content = myblob.read().decode('utf-8')
 
 
+# Establecer el contenido del nuevo archivo en la salida de la llamada de la API de OpenAI
+prompt = file_content
+beginning_text = "Esta es una conversación del centro de llamadas ###"
+ending_text = """### Resumir esto en json por
+            satisfacción del cliente en una escala de 1 a 10 con 1 siendo el menos satisfecho,
+            sentimiento del cliente,
+            duración del chat en segundos,
+            problema resuelto verdadero/falso,
+            categoría de problema,
+            subcategoría de problema,
+            nombre del agente,
+            nombre del cliente."""
+prompt = beginning_text + prompt + ending_text
 
-    openai.api_type = "azure"
-    openai.api_base = "https://openai-sandbox-jep.openai.azure.com/"
-    openai.api_version = "2022-12-01"
-    openai.api_key = os.getenv("OpenAIKey")
 
-    response = openai.Completion.create(
-    engine="davinci3",
-    prompt=prompt,
-    temperature=0.7,
-    max_tokens=256,
-    top_p=1,
-    frequency_penalty=0,
-    presence_penalty=0
-    )
 
-    file_content = response.choices[0].text
+openai.api_type = "azure"
+openai.api_base = "https://openai-sandbox-jep.openai.azure.com/"
+openai.api_version = "2022-12-01"
+openai.api_key = os.environ["OpenAIKey"]
 
-    # Save the modified contents to the new blob
-    new_blob_client.upload_blob(file_content, overwrite=True)
+response = openai.Completion.create(
+engine="davinci3",
+prompt=prompt,
+temperature=0.7,
+max_tokens=256,
+top_p=1,
+frequency_penalty=0,
+presence_penalty=0
+)
 
-    logging.info(f"Blob {myblob.name} duplicated in the same container with text completions and renamed to {file_name}.")
+file_content = response.choices[0].text
+
+# Guardar el contenido modificado en el nuevo blob
+new_blob_client.upload_blob(file_content, overwrite=True)
+
+logging.info(f"Blob {myblob.name} duplicado en el mismo contenedor con completaciones de texto y renombrado a {file_name}.")
