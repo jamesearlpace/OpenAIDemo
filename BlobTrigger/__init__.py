@@ -18,7 +18,7 @@ def main(myblob: func.InputStream):
                  f"Blob Size: {myblob.length} bytes")
 
     # Parse connection string and container name from the environment variables
-    connection_string = "DefaultEndpointsProtocol=https;AccountName=saopenaisandbox;AccountKey=3zOOdiUMlWk1nSCdTdaAkjn3+bzGaeqaYUvCLfe6C82bhB/zi56uLHBEYOTxmbUZDyRBbgyS2RbW+AStD/aEHA==;EndpointSuffix=core.windows.net"
+    connection_string = "StorageConnectionString"
 
     # Create BlobServiceClient using the connection string
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
@@ -54,7 +54,7 @@ def main(myblob: func.InputStream):
     openai.api_type = "azure"
     openai.api_base = "https://openai-sandbox-jep.openai.azure.com/"
     openai.api_version = "2022-12-01"
-    openai.api_key = os.getenv("MyKey")
+    openai.api_key = os.getenv("OpenAIKey")
 
     response = openai.Completion.create(
     engine="davinci3",

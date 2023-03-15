@@ -14,7 +14,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             name = req_body.get('name')
 
     if name:
-        openai.api_key = "MyKey"
+        openai.api_key = "OpenAIKey"
         response = openai.Completion.create(
         model="text-davinci-003",
         prompt=name,
