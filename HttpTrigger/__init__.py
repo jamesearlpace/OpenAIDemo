@@ -14,7 +14,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             name = req_body.get('name')
 
     if name:
-        openai.api_key = "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"
+        openai.api_key = "MyKey"
         response = openai.Completion.create(
         model="text-davinci-003",
         prompt=name,
@@ -28,7 +28,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         #print(response)
         response = response['choices'][0]['text']
 
-        name = name + "!!!"
         return func.HttpResponse(f"{response}")
     else:
         return func.HttpResponse(
